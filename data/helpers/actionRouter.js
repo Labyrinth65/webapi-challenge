@@ -9,7 +9,6 @@ router.get("/", async (req, res) => {
 		const actions = await actionsDB.getAll(req.query);
 		res.status(200).json(actions);
 	} catch (error) {
-		// log error to database
 		console.log(error);
 		res.status(500).json({
 			error: "The actions could not be retrieved."
@@ -21,7 +20,6 @@ router.get("/:id", checkActionId, async (req, res) => {
 	try {
 		res.status(200).json(req.action);
 	} catch (error) {
-		// log error to database
 		console.log(error);
 		res.status(500).json({
 			error: "The action could not be retrieved."
@@ -36,7 +34,6 @@ router.delete("/:id", checkActionId, async (req, res) => {
 			res.status(200).json(req.action);
 		}
 	} catch (error) {
-		// log error to database
 		console.log(error);
 		res.status(500).json({
 			error: "The action could not be removed"
@@ -49,7 +46,6 @@ router.put("/:id", checkActionId, checkAction, async (req, res) => {
 		const action = await actionsDB.update(req.params.id, req.body);
 		res.status(200).json(action);
 	} catch (error) {
-		// log error to database
 		console.log(error);
 		res.status(500).json({
 			error: "The action could not be modified."
@@ -63,7 +59,7 @@ async function checkActionId(req, res, next) {
 	try {
 		const all = await actionsDB.getAll(req.query);
 		const exist = await all.map(el => el.id).includes(parseInt(req.params.id));
-		if (exist === true) {
+		if (exist) {
 			const action = await actionsDB.get(req.params.id);
 			req.action = action;
 			next();

@@ -14,7 +14,6 @@ router.post("/", checkProject, async (req, res) => {
 		const newProject = await projectsDB.get(project.id);
 		res.status(201).json(newProject);
 	} catch (error) {
-		// log error to database
 		console.log(error);
 		res.status(500).json({
 			error: "There was an error while adding the project to the database"
@@ -31,7 +30,6 @@ router.post("/:id/actions", checkProjectId, checkAction, async (req, res) => {
 		});
 		res.status(201).json(action);
 	} catch (error) {
-		// log error to database
 		console.log(error);
 		res.status(500).json({
 			error: "There was an error while adding the action to the database"
@@ -44,7 +42,6 @@ router.get("/", async (req, res) => {
 		const projects = await projectsDB.getAll(req.query);
 		res.status(200).json(projects);
 	} catch (error) {
-		// log error to database
 		console.log(error);
 		res.status(500).json({
 			error: "The projects could not be retrieved."
@@ -56,7 +53,6 @@ router.get("/:id", checkProjectId, async (req, res) => {
 	try {
 		res.status(200).json(req.project);
 	} catch (error) {
-		// log error to database
 		console.log(error);
 		res.status(500).json({
 			error: "The project information could not be retrieved."
@@ -75,7 +71,6 @@ router.get("/:id/actions", checkProjectId, async (req, res) => {
 			res.status(200).json(actions);
 		}
 	} catch (error) {
-		// log error to database
 		console.log(error);
 		res.status(500).json({
 			error: "The project actions information could not be retrieved."
@@ -90,7 +85,6 @@ router.delete("/:id", checkProjectId, async (req, res) => {
 			res.status(200).json(req.project);
 		}
 	} catch (error) {
-		// log error to database
 		console.log(error);
 		res.status(500).json({
 			error: "The project could not be removed"
@@ -103,7 +97,6 @@ router.put("/:id", checkProjectId, checkProject, async (req, res) => {
 		const project = await projectsDB.update(req.params.id, req.body);
 		res.status(200).json(project);
 	} catch (error) {
-		// log error to database
 		console.log(error);
 		res.status(500).json({
 			error: "The project information could not be modified."
