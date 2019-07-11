@@ -1,90 +1,94 @@
 const express = require("express");
 
 const actionsDB = require("./actionModel.js");
-const mappers = require("./mappers.js");
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
 	try {
-		const posts = await actionsDB.get(req.query);
-		res.status(200).json(posts);
+		const actions = await actionsDB.getAll(req.query);
+		res.status(200).json(actions);
 	} catch (error) {
 		// log error to database
 		console.log(error);
 		res.status(500).json({
-			error: "The posts could not be retrieved."
+			error: "The actions could not be retrieved."
 		});
 	}
 });
 
-router.get("/:id", validatePostId, async (req, res) => {
+router.get("/:id", checkActionId, async (req, res) => {
 	try {
-		res.status(200).json(req.post);
+		res.status(200).json(req.action);
 	} catch (error) {
 		// log error to database
 		console.log(error);
 		res.status(500).json({
-			error: "The post could not be retrieved."
+			error: "The action could not be retrieved."
 		});
 	}
 });
 
-router.delete("/:id", validatePostId, async (req, res) => {
+router.delete("/:id", checkActionId, async (req, res) => {
 	try {
 		const count = await actionsDB.remove(req.params.id);
 		if (count > 0) {
-			res.status(200).json(req.post);
+			res.status(200).json(req.action);
 		}
 	} catch (error) {
 		// log error to database
 		console.log(error);
 		res.status(500).json({
-			error: "The post could not be removed"
+			error: "The action could not be removed"
 		});
 	}
 });
 
-router.put("/:id", validatePostId, validatePost, async (req, res) => {
+router.put("/:id", checkActionId, checkAction, async (req, res) => {
 	try {
-		const post = await actionsDB.update(req.params.id, req.body);
-		res.status(200).json(post);
+		const action = await actionsDB.update(req.params.id, req.body);
+		res.status(200).json(action);
 	} catch (error) {
 		// log error to database
 		console.log(error);
 		res.status(500).json({
-			error: "The post could not be modified."
+			error: "The action could not be modified."
 		});
 	}
 });
 
 // custom middleware
 
-async function validatePostId(req, res, next) {
+async function checkActionId(req, res, next) {
 	try {
-		const post = await actionsDB.getById(req.params.id);
-		if (post) {
-			req.post = post;
-			next();
+		const exist = await actionsDB.getAll(req.query);
+		await exist.map(el => el.id).includes(parseInt(req.params.id));
+		console.log(exist);
+		console.log(await exist.map(el => el.id).includes(parseInt(req.params.id)));
+		if (exist === false) {
+			res.status(400).json({ message: "invalid action id" });
 		} else {
-			res.status(400).json({ message: "invalid post id" });
+			const action = await actionsDB.get(req.params.id);
+			req.action = action;
+			next();
 		}
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({
-			error: "The post information could not be retrieved."
+			error: "The action information could not be retrieved."
 		});
 	}
 }
 
-function validatePost(req, res, next) {
-	if (Object.keys(req.body).length === 0) {
-		res.status(400).json({ message: "missing post data" });
-	} else if (!req.body.text) {
-		res.status(400).json({ message: "missing required text field" });
-	} else {
-		next();
-	}
+function checkAction(req, res, next) {
+	if (Object.keys(req.body).length === 0)
+		return res.status(400).json({ message: "missing action data" });
+	const { description, notes } = req.body;
+	if (!description || !notes)
+		return res
+			.status(400)
+			.json({ message: "missing required description or notes field" });
+	next();
 }
 
 module.exports = router;
