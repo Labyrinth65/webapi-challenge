@@ -61,16 +61,14 @@ router.put("/:id", checkActionId, checkAction, async (req, res) => {
 
 async function checkActionId(req, res, next) {
 	try {
-		const exist = await actionsDB.getAll(req.query);
-		await exist.map(el => el.id).includes(parseInt(req.params.id));
-		console.log(exist);
-		console.log(await exist.map(el => el.id).includes(parseInt(req.params.id)));
-		if (exist === false) {
-			res.status(400).json({ message: "invalid action id" });
-		} else {
+		const all = await actionsDB.getAll(req.query);
+		const exist = await all.map(el => el.id).includes(parseInt(req.params.id));
+		if (exist === true) {
 			const action = await actionsDB.get(req.params.id);
 			req.action = action;
 			next();
+		} else {
+			res.status(400).json({ message: "invalid action id" });
 		}
 	} catch (error) {
 		console.log(error);
